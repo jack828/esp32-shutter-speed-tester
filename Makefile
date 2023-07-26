@@ -24,7 +24,7 @@ upload:
 monitor:
 	arduino-cli monitor \
 		-p $(PORT) \
-		--config Baudrate=9600
+		--config Baudrate=115200
 
 clean:
 	rm -rf ./build
