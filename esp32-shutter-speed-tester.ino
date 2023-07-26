@@ -1,136 +1,31 @@
-#include <Arduino.h>
-#include <SPI.h>
-#include "ST7735S.h"
-
-#define FLIP
-#define LCD_DC 6
-#define LCD_CS 7
-#define LCD_RST 10
-#define LCD_SCK 2    // SPI
-#define LCD_MISO 12  // SPI
-#define LCD_MOSI 3   // SPI
-#define LCD_SS 7     // SPI
-#define LCD_BL 11    // backlight
-
 #define KEY_UP 8
 #define KEY_RIGHT 9
 #define KEY_DOWN 13
 #define KEY_LEFT 5
 #define KEY_CENTRE 4
 
-const uint8_t KEY_PINS[5] = { KEY_UP, KEY_RIGHT, KEY_DOWN, KEY_LEFT, KEY_CENTRE };
+#include <TFT_eSPI.h>
+#include <SPI.h>
 
-ST7735S<LCD_DC, LCD_CS, LCD_RST> lcd;
+TFT_eSPI tft = TFT_eSPI();
 
-static void fade(uint8_t from, uint8_t to, uint8_t delta) {
-  if (from < to) {
-    for (uint16_t f = from; f <= to; f += delta) {
-      ledcWrite(0, f);
-      delay(50);
-    }
-  } else {
-    for (int16_t f = from; f >= to; f -= delta) {
-      ledcWrite(0, f);
-      delay(50);
-    }
-  }
-}
-
-static void drawMenuItem(uint8_t index, bool active = false) {
-  char str[21];
-
-  sprintf(str, "Item #%u", index);
-  lcd.print(0, lcd.charHeight() * index, str, lcd.WHITE, active ? lcd.BLUE : lcd.BLACK);
-}
-
-void setup() {
+void setup(void) {
   Serial.begin(115200);
+  Serial.print("Hello! ST7735 TFT Test\n");
 
-  for (uint8_t i = 0; i < sizeof(KEY_PINS) / sizeof(KEY_PINS[0]); ++i) {
-    pinMode(KEY_PINS[i], INPUT_PULLUP);
-  }
+  tft.init();
+  tft.setRotation(1);
+  tft.fillScreen(TFT_BLACK);
+  Serial.println("Initialized");
 
-  ledcSetup(0, 1000, 8);
-  ledcAttachPin(LCD_BL, 0);
-  //  ledcWrite(0, 127);
-  SPI.begin(LCD_SCK, LCD_MISO, LCD_MOSI, LCD_SS);
-  lcd.begin();
-#ifdef FLIP
-  lcd.flip(true);
-#endif
-  lcd.fill(0, 0, lcd.width(), lcd.height(), lcd.RED);
-  fade(0, 128, 4);
-  lcd.fill(0, 0, lcd.width(), lcd.height(), lcd.GREEN);
-  fade(0, 128, 4);
-  lcd.fill(0, 0, lcd.width(), lcd.height(), lcd.BLUE);
-  fade(0, 128, 4);
-  lcd.fill(0, 0, lcd.width(), lcd.height(), lcd.WHITE);
-  fade(0, 128, 4);
-  lcd.clear();
-  /*
-  for (char c = ' '; c < 127; ++c) {
-    lcd.print(((c - ' ') % (lcd.width() / (lcd.charWidth()))) * (lcd.charWidth()), ((c - ' ') / (lcd.width() / (lcd.charWidth()))) * lcd.charHeight(), c, lcd.WHITE);
-  }
-  delay(5000);
-  lcd.clear();
-*/
-
-  lcd.print(0, 0, "        MENU        ", lcd.YELLOW, lcd.GRAY);
-  drawMenuItem(1, true);
-  drawMenuItem(2);
-  drawMenuItem(3);
-  drawMenuItem(4);
 }
 
-void loop() {
-  static uint8_t keys = 0x1F;
-  static uint8_t pos = 1;
-
-  for (uint8_t i = 0; i < sizeof(KEY_PINS) / sizeof(KEY_PINS[0]); ++i) {
-    if (((keys >> i) & 0x01) != digitalRead(KEY_PINS[i])) {
-      if ((keys >> i) & 0x01) {
-        drawMenuItem(pos);
-        switch (i) {
-#ifdef FLIP
-          case 2:  // DN
-#else
-          case 0:  // UP
-#endif
-            if (pos > 1)
-              --pos;
-            else
-              pos = 4;
-            break;
-#ifdef FLIP
-          case 3:  // LT
-#else
-          case 1:  // RT
-#endif
-            pos = 4;
-            break;
-#ifdef FLIP
-          case 0:  // UP
-#else
-          case 2:  // DN
-#endif
-            if (pos < 4)
-              ++pos;
-            else
-              pos = 1;
-            break;
-#ifdef FLIP
-          case 1:  // RT
-#else
-          case 3:  // LT
-#endif
-            pos = 1;
-            break;
-          case 4:  // CR
-            break;
-        }
-        drawMenuItem(pos, true);
-      }
-      keys ^= (1 << i);
-    }
-  }
+void loop () {
+  tft.fillScreen(TFT_BLACK);
+  tft.setTextSize(3);
+  tft.setTextColor(TFT_RED);
+  tft.printf("SHUTTER\n");
+  tft.printf("SPEED\n");
+  tft.printf("TESTER");
+  delay(500);
 }
