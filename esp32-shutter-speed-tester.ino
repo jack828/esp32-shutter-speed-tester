@@ -9,23 +9,28 @@
 
 TFT_eSPI tft = TFT_eSPI();
 
-void setup(void) {
+void setup() {
   Serial.begin(115200);
-  Serial.print("Hello! ST7735 TFT Test\n");
+  Serial.println("Hello! ST7735 TFT");
 
   tft.init();
   tft.setRotation(1);
   tft.fillScreen(TFT_BLACK);
-  Serial.println("Initialized");
+  Serial.println("Initialised");
 
-}
-
-void loop () {
+  int16_t gutterSize = tft.fontHeight() / 2;
   tft.fillScreen(TFT_BLACK);
   tft.setTextSize(3);
   tft.setTextColor(TFT_RED);
-  tft.printf("SHUTTER\n");
-  tft.printf("SPEED\n");
-  tft.printf("TESTER");
+  tft.setTextDatum(TC_DATUM);
+  tft.drawString("SHUTTER", tft.width() / 2, 0 + gutterSize);
+  tft.drawString("SPEED", tft.width() / 2, tft.fontHeight() + gutterSize);
+  tft.drawString("TESTER", tft.width() / 2, (tft.fontHeight() * 2) + gutterSize);
+
+  delay(1000);
+  tft.fillScreen(TFT_BLACK);
+}
+
+void loop() {
   delay(500);
 }
