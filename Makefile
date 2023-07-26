@@ -1,7 +1,7 @@
 SHELL:=/bin/bash
 PWD=$(shell pwd)
 PORT=/dev/ttyACM0
-FQBN=esp32:esp32:esp32c3
+FQBN=esp32:esp32:esp32c3:FlashMode=dio
 FILENAME=esp32-shutter-speed-tester
 
 compile:
