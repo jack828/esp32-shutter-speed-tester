@@ -3,11 +3,24 @@
 #include "ST7735S.h"
 
 #define FLIP
+#define LCD_DC 6
+#define LCD_CS 7
+#define LCD_RST 10
+#define LCD_SCK 2    // SPI
+#define LCD_MISO 12  // SPI
+#define LCD_MOSI 3   // SPI
+#define LCD_SS 7     // SPI
+#define LCD_BL 11    // backlight
 
-const uint8_t BL_PIN = 11;
-const uint8_t KEY_PINS[5] = { 8, 9, 13, 5, 4 };  // UP, RT, DN, LT, CR
+#define KEY_UP 8
+#define KEY_RIGHT 9
+#define KEY_DOWN 13
+#define KEY_LEFT 5
+#define KEY_CENTRE 4
 
-ST7735S<6, 7, 10> lcd;
+const uint8_t KEY_PINS[5] = { KEY_UP, KEY_RIGHT, KEY_DOWN, KEY_LEFT, KEY_CENTRE };
+
+ST7735S<LCD_DC, LCD_CS, LCD_RST> lcd;
 
 static void fade(uint8_t from, uint8_t to, uint8_t delta) {
   if (from < to) {
@@ -38,10 +51,9 @@ void setup() {
   }
 
   ledcSetup(0, 1000, 8);
-  ledcAttachPin(BL_PIN, 0);
+  ledcAttachPin(LCD_BL, 0);
   //  ledcWrite(0, 127);
-
-  SPI.begin(2, 12, 3, 7);
+  SPI.begin(LCD_SCK, LCD_MISO, LCD_MOSI, LCD_SS);
   lcd.begin();
 #ifdef FLIP
   lcd.flip(true);
